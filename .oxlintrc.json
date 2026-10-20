@@ -1,0 +1,8 @@
+{
+  "categories": {
+    "correctness": "deny",
+    "suspicious": "deny",
+    "perf": "warn"
+  },
+  "ignorePatterns": ["dist", "coverage", "playwright-report", "src/routeTree.gen.ts"]
+}
