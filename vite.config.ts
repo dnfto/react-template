@@ -9,7 +9,11 @@ export default defineConfig(({ mode }) => {
     plugins: [
       react(),
       tailwindcss(),
-      checker({ typescript: true, eslint: { lintCommand: 'eslint .', useFlatConfig: true } }),
+      checker({
+        typescript: true,
+        eslint: { lintCommand: 'eslint .', useFlatConfig: true },
+        enableBuild: false,
+      }),
     ],
     resolve: {
       alias: {

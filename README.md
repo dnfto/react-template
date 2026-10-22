@@ -1,100 +1,84 @@
 # React Starter Template
 
-Production-ready React starter template for company-wide frontend applications.
+A practical React baseline for starting product screens without rebuilding routing, API, state, testing, and quality tooling on every project.
 
-## Stack
+[한국어 문서](./README.ko.md)
 
-- React 19 with Vite
-- TypeScript strict mode
-- TanStack Router for typed routing
-- TanStack Query for server state
-- Zustand for client UI state
-- React Hook Form and Zod for forms and validation
-- Tailwind CSS v4 and shadcn/ui-compatible primitives
-- Axios for HTTP infrastructure
-- Vitest, React Testing Library, MSW, and Playwright
-- ESLint, Oxlint, Prettier, Husky, lint-staged, and Commitlint
+## Start developing
 
-Axios is used because enterprise apps commonly need interceptors, token refresh orchestration, cancellation, and response transformation in one place. `ky` is also excellent for smaller fetch-first applications, but Axios remains a pragmatic default for this template's authentication and retry requirements.
-
-## Getting Started
+Requirements: Node.js 24 and npm 10 or newer. The repository includes `.nvmrc` for nvm users.
 
 ```bash
-npm install
+nvm use
+npm ci
 npm run dev
 ```
 
-## Scripts
+Open `http://localhost:5173`. Development mode starts MSW automatically, so the home and users examples work without a backend or local environment file.
 
-- `npm run dev` starts Vite.
-- `npm run build` type-checks and builds production assets.
-- `npm run build:analyze` generates a bundle report.
-- `npm run typecheck` runs TypeScript project references.
-- `npm run lint` runs ESLint and Oxlint.
-- `npm run format` formats the repository.
-- `npm run test` runs unit and integration tests.
-- `npm run test:e2e` runs Playwright.
+Before opening a pull request, run the same checks as CI:
 
-## Architecture
+```bash
+npm run check
+npm run build
+npm run test:e2e
+```
+
+## Connect a backend
+
+Create an ignored `.env.local` only when you need machine-specific values:
+
+```dotenv
+VITE_API_BASE_URL="https://api.example.com"
+VITE_ENABLE_API_MOCKING="false"
+```
+
+All `VITE_` variables are public because Vite embeds them in the browser bundle. Never put secrets in these files. Environment values are validated at startup in `src/shared/config/env.ts`.
+
+## Project structure
 
 ```text
 src/
-  app/        application bootstrap, providers, layouts, router
-  shared/     reusable cross-feature code with no business ownership
-  features/   business capabilities grouped by domain
-  widgets/    composed feature/shared blocks used by pages
-  pages/      route-level screens
+  app/       bootstrap, providers, layouts, and router
+  features/  business capabilities grouped by domain
+  mocks/     local API handlers used in development and tests
+  pages/     route-level screen composition
+  shared/    domain-independent API, UI, hooks, and utilities
+  widgets/   reusable screen sections composed from features
+tests/
+  api/ components/ hooks/ integration/ e2e/
 ```
 
-Use feature folders for business behavior. Shared code must be stable, generic, and reusable across features. Avoid moving feature-specific logic into `shared` just to avoid imports.
+Dependencies flow toward `shared`: app → pages → widgets → features → shared. ESLint rejects imports that point back up the tree. Keep server data in TanStack Query and browser-only UI state in Zustand.
 
-## State Boundary
+## Common commands
 
-TanStack Query owns server state because it is asynchronous, cacheable, invalidatable, and ultimately owned by backend APIs. Zustand owns client UI state because it is synchronous and local to the browser session. Do not mirror query data into Zustand.
+| Command                 | Purpose                                     |
+| ----------------------- | ------------------------------------------- |
+| `npm run dev`           | Start the Vite development server           |
+| `npm run check`         | Run formatting, types, lint, and Vitest     |
+| `npm run build`         | Type-check and create the production bundle |
+| `npm run test:watch`    | Run Vitest while developing                 |
+| `npm run test:coverage` | Generate unit/integration coverage          |
+| `npm run test:e2e`      | Run Playwright in Chromium and WebKit       |
+| `npm run build:analyze` | Build and inspect bundle composition        |
+| `npm run lint:fix`      | Apply safe lint fixes                       |
+| `npm run format`        | Format supported files                      |
 
-## Environment
+Install Playwright browsers once before the first local E2E run:
 
-Copy `.env.local.example` to `.env.local` for machine-specific overrides. Public client variables must use the `VITE_` prefix. Runtime validation lives in `src/shared/config/env.ts`.
-
-## Routing
-
-Routes are defined with TanStack Router and support nested layouts, guards, preloading, code splitting, not found, and error boundaries. Protected routes should use `beforeLoad` guards and redirect unauthenticated users.
-
-## API Layer
-
-All HTTP calls go through `src/shared/api/http-client.ts`. The API layer centralizes base URL, auth headers, token refresh, typed responses, retry policy, cancellation, response transformation, logging, and error normalization.
-
-## Testing
-
-- Component tests live in `tests/components`.
-- Hook tests live in `tests/hooks`.
-- API tests use MSW in `tests/api`.
-- Integration tests live in `tests/integration`.
-- E2E tests live in `tests/e2e`.
-
-## Git Workflow
-
-Use Conventional Commits:
-
-```text
-feat: add account settings page
-fix: handle expired access token
-chore: update dependencies
+```bash
+npx playwright install
 ```
 
-Recommended branch names:
+## Starting a real product
 
-```text
-feature/account-settings
-fix/token-refresh-race
-chore/dependency-updates
-```
+1. Change the package name, app name, HTML metadata, favicon, and theme storage key.
+2. Replace the sample users feature and MSW handlers with the first product domain.
+3. Point `.env.local` at the development API, then disable mocks when integration starts.
+4. Adapt authentication to the backend. The included bearer-token flow is an integration example; prefer server-managed HttpOnly cookies when the platform supports them.
+5. Add service-specific monitoring and deployment workflows without weakening the existing quality checks.
 
-## Coding Conventions
+The pre-commit hook formats and lints staged files. Commit messages follow Conventional Commits, for example `feat: add account settings page`.
 
-- Prefer functional components, custom hooks, composition, and pure functions.
-- Keep components small and focused.
-- Keep business logic in features, not UI primitives.
-- Prefer discriminated unions and readonly data for domain models.
-- Avoid `any`, unnecessary assertions, global state abuse, magic strings, and duplicated logic.
-- Add barrel exports only for stable public module APIs.
+More detail is available in [`docs/architecture.ko.md`](./docs/architecture.ko.md) and [`docs/testing.ko.md`](./docs/testing.ko.md).
