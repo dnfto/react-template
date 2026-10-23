@@ -1,6 +1,6 @@
 import { QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { getApiErrorMessage } from '@/shared/api/api-error';
+import { ApiError, getApiErrorMessage } from '@/shared/api/api-error';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -8,9 +8,11 @@ export const queryClient = new QueryClient({
       staleTime: 60_000,
       gcTime: 10 * 60_000,
       retry: (failureCount, error) => {
-        const status =
-          error instanceof Error && 'status' in error ? Number(error.status) : undefined;
-        return status !== undefined && status < 500 ? false : failureCount < 2;
+        if (error instanceof ApiError && error.status !== undefined && error.status < 500) {
+          return false;
+        }
+
+        return failureCount < 2;
       },
       refetchOnWindowFocus: false,
     },

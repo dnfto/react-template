@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 
 type AuthTokens = {
   readonly accessToken: string;
@@ -34,7 +34,20 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-session',
-      partialize: (state) => ({ tokens: state.tokens, user: state.user }),
+      storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({
+        tokens: state.tokens,
+        user: state.user,
+      }),
+      merge: (persistedState, currentState) => {
+        const session = persistedState as Partial<Pick<AuthState, 'tokens' | 'user'>>;
+
+        return {
+          ...currentState,
+          ...session,
+          isAuthenticated: Boolean(session.tokens),
+        };
+      },
     },
   ),
 );

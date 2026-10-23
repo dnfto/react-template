@@ -4,5 +4,3 @@ export const HTTP_STATUS = {
   notFound: 404,
   serverError: 500,
 } as const;
-
-export const IDEMPOTENT_METHODS = ['get', 'head', 'options', 'put', 'delete'] as const;
