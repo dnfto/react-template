@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
-import { env } from '@/shared/config/env';
 import type { User } from '@/features/users/model/user.types';
+import { env } from '@/shared/config/env';
 
 const users = [
   {
