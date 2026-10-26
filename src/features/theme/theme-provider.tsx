@@ -7,7 +7,7 @@ import {
   type PropsWithChildren,
 } from 'react';
 
-type Theme = 'dark' | 'light' | 'system';
+export type Theme = 'dark' | 'light' | 'system';
 
 type ThemeProviderProps = PropsWithChildren<{
   defaultTheme?: Theme;
@@ -19,12 +19,11 @@ type ThemeProviderState = {
   readonly setTheme: (theme: Theme) => void;
 };
 
-const initialState = {
-  theme: 'system',
-  setTheme: () => undefined,
-} satisfies ThemeProviderState;
+const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
 
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+function isTheme(value: string | null): value is Theme {
+  return value === 'dark' || value === 'light' || value === 'system';
+}
 
 export function ThemeProvider({
   children,
@@ -32,22 +31,29 @@ export function ThemeProvider({
   storageKey = 'theme',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    return (localStorage.getItem(storageKey) as Theme | null) ?? defaultTheme;
+    const storedTheme = localStorage.getItem(storageKey);
+    return isTheme(storedTheme) ? storedTheme : defaultTheme;
   });
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
+    const root = document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+      const resolvedTheme = theme === 'system' ? (mediaQuery.matches ? 'dark' : 'light') : theme;
+      root.classList.remove('light', 'dark');
+      root.classList.add(resolvedTheme);
+      root.style.colorScheme = resolvedTheme;
+    };
+
+    applyTheme();
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme);
-      return;
+      mediaQuery.addEventListener('change', applyTheme);
+      return () => mediaQuery.removeEventListener('change', applyTheme);
     }
 
-    root.classList.add(theme);
+    return undefined;
   }, [theme]);
 
   const value = useMemo(

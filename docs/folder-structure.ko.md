@@ -21,6 +21,10 @@
 
 제품 기능을 도메인 단위로 담습니다. 기능이 커지면 내부에 `api`, `model`, `queries`, `components`, `lib` 등을 만들 수 있습니다.
 
+## src/mocks
+
+로컬 개발과 테스트가 공유하는 MSW handler를 둡니다. 실제 API 계약이 바뀌면 feature 타입, API 함수, handler를 함께 수정합니다.
+
 ## src/widgets
 
 페이지에서 재사용하는 큰 UI 블록입니다. 여러 feature를 조합할 수 있지만, 앱 전체 설정이나 라우팅 책임은 갖지 않습니다.

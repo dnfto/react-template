@@ -6,7 +6,7 @@
 
 `features`는 비즈니스 능력 단위입니다. 인증, 사용자, 결제, 대시보드처럼 제품 기능을 기준으로 코드를 모읍니다. 각 feature 내부에서는 `api`, `model`, `queries`, `components`처럼 필요한 하위 구조를 자유롭게 둘 수 있습니다.
 
-`shared`는 비즈니스 의미를 모르는 재사용 계층입니다. 여기에 들어온 코드는 여러 feature에서 안정적으로 재사용될 수 있어야 하며, 특정 도메인의 정책을 직접 포함하면 안 됩니다.
+`shared`는 비즈니스 의미를 모르는 재사용 계층입니다. 여기에 들어온 코드는 여러 feature에서 안정적으로 재사용될 수 있어야 하며, 특정 도메인의 정책을 직접 포함하면 안 됩니다. 계층을 거슬러 올라가는 import는 ESLint가 차단합니다.
 
 `widgets`는 여러 feature와 shared 컴포넌트를 조합해 화면의 큰 덩어리를 만듭니다. 페이지가 너무 커지는 것을 막고, 재사용 가능한 화면 블록을 만들기 위한 계층입니다.
 
@@ -22,9 +22,9 @@
 
 ## API Layer
 
-Axios 인스턴스를 직접 feature에서 만들지 않습니다. `shared/api/http-client.ts`가 인증 헤더, refresh token, 재시도, 에러 변환, 취소 신호를 중앙에서 처리합니다.
+Axios 인스턴스를 직접 feature에서 만들지 않습니다. `shared/api/http-client.ts`는 인증 adapter, 에러 정규화, 취소 신호를 위한 공통 경계입니다. 실제 인증 상태와 token refresh 구현은 `app/bootstrap.ts`에서 주입하므로 shared 계층이 auth feature를 역참조하지 않습니다.
 
-새 API 함수는 feature 내부 `api` 폴더에 두되, HTTP 호출은 반드시 공통 `apiClient`를 사용하세요. 이렇게 해야 인증 정책이나 에러 형식이 바뀌어도 한 곳만 수정하면 됩니다.
+새 API 함수는 feature 내부 `api` 폴더에 두되, HTTP 호출은 반드시 공통 `apiClient`를 사용하세요. 서버 조회의 재시도 정책은 TanStack Query에서 관리해 HTTP client와 중복 재시도가 발생하지 않게 합니다.
 
 ## Routing
 

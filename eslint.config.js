@@ -7,7 +7,9 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   { ignores: ['dist', 'coverage', 'playwright-report', 'src/routeTree.gen.ts'] },
   js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked.map((config) => Object.assign(config, { files: ['**/*.{ts,tsx}'] })),
+  ...tseslint.configs.recommendedTypeChecked.map((config) =>
+    Object.assign(config, { files: ['**/*.{ts,tsx}'] }),
+  ),
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
@@ -47,6 +49,70 @@ export default tseslint.config(
     files: ['src/app/router/router.tsx'],
     rules: {
       '@typescript-eslint/consistent-type-definitions': 'off',
+    },
+  },
+  {
+    files: ['src/shared/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/app/**', '@/features/**', '@/pages/**', '@/widgets/**'],
+              message: 'Shared code must not depend on application or business layers.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/features/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/app/**', '@/pages/**', '@/widgets/**'],
+              message: 'Features may only depend on shared code and other explicit domain APIs.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/widgets/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/app/**', '@/pages/**'],
+              message: 'Widgets must remain independent from routing and application setup.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/pages/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/app/**'],
+              message: 'Pages are composed by the app layer and must not import it back.',
+            },
+          ],
+        },
+      ],
     },
   },
 );
