@@ -30,8 +30,8 @@ shadcn/ui CLI가 어떤 alias와 Tailwind 엔트리를 사용할지 알려줍니
 
 ## .env 파일들
 
-공개 가능한 기본값은 `.env`, 환경별 기본값은 `.env.development`와 `.env.production`, 개인 로컬 값은 `.env.local`에 둡니다. 실제 비밀 값은 클라이언트 번들에 포함되면 안 됩니다.
+공개 가능한 기본값은 `.env`, 환경별 기본값은 `.env.development`와 `.env.production`, 개인 로컬 값은 `.env.local`에 둡니다. 개발 모드는 MSW가 기본 활성화되어 백엔드 없이 실행됩니다. 실제 비밀 값은 클라이언트 번들에 포함되면 안 됩니다.
 
 ## GitHub Actions
 
-CI는 install, typecheck, lint, test, build 순서로 실패를 빠르게 드러냅니다. 배포 단계는 서비스별 인프라가 정해진 뒤 별도 workflow로 추가하세요.
+CI는 format check, typecheck, lint, test, build를 먼저 실행하고 통과한 변경에 대해 별도 E2E job을 실행합니다. 로컬에서는 `npm run check`, `npm run build`, `npm run test:e2e` 순서로 같은 검사를 수행할 수 있습니다. 배포 단계는 서비스별 인프라가 정해진 뒤 별도 workflow로 추가하세요.
